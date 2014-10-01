@@ -44,6 +44,8 @@ for row in c.execute('SELECT qty, price FROM stocks ORDER BY price'):
 
 print(inception)
         
+
+    
 #print()
 #r = ('Region',)
 #c.execute('SELECT * FROM AgentEntry WHERE  Kind = ?', r)
