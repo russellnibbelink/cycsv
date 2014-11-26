@@ -22,9 +22,24 @@ def make_list(metric, table, order):
 def make_sort_list(metric, table, order,filter_category, filter_metric):
     #make_sort_list('TransactionId', 'Transactions', 'Time', 'SenderId', 24)
     mlist = []
-    for row in c.execute('SELECT '+ metric, Time +','+ filter_category + ' FROM ' + table + ' ORDER BY ' + order):
-        if row[1] == filter_metric:
-            mlist.append(row[0])
+    for row in c.execute('SELECT '+ metric + ", Time" +','+ filter_category + ' FROM ' + table + ' ORDER BY ' + order):
+        if row[2] == filter_metric:
+            mlist.append([row[0], row[1]])
+    #print(mlist)
+    return mlist
+
+def make_raw_list(metric, table, order,filter_category, filter_list):
+    #make_sort_list('TransactionId', 'Transactions', 'Time', 'SenderId', 24)
+    mlist = []
+    i = 0
+    for row in c.execute('SELECT '+ metric +','+ filter_category + ' FROM ' + table + ' ORDER BY ' + order):
+        if row[1] == filter_list[i][0]:
+            mlist.append([row[0], filter_list[i][1]])
+            #print(i)
+            if i == len(filter_list)-1:
+                break
+            i+=1
+    #print(mlist)
     return mlist
 
 def test_list_1200():
@@ -39,14 +54,15 @@ def test_list_1200():
 
 #first function takes in metric, time
 
-def time_sort1(metric, time, lst):
-    lst[time // 12] += metric
-    return
+def time_sort(processed_data, year = 200):
+    lst = [0] * year
+    for tup in processed_data:
+        index = tup[1] // 12
+        lst[index] += tup[0]
+    return lst
 
 ########
 
-def time_sort2(tup):
-    return
 
 def test_list_1200_one():
     test = []
@@ -99,9 +115,6 @@ test1 = test_list_1200_one()
 test2 = test_list_1200()
 csv_test = cumulative(test1)
 
-#get this to work -->
-#to do: not all data is sampled exactly every month. Keep track of time stamp to determine the data points for each year. (determine when a year has passed).
-
 def csv_w(data, name):
     #with open(name, 'w', newline='') as csvfile:
     with open(name, 'w') as csvfile:
@@ -110,4 +123,40 @@ def csv_w(data, name):
         for item in data:
             writer.writerow([item])
     return name
+
+
+#get this to work -->
+#to do: not all data is sampled exactly every month. Keep track of time stamp to determine the data points for each year. (determine when a year has passed).
+
+### first metric
+db_name = "cyclus200year.sqlite"
+connDB(db_name)
+
+sim_length = 200;
+
+metric_name = "Uranium Mined"
+metric_cat = "ResourceId"
+data = "Quantity"
+table_name = "Transactions"
+data_table = "Resources"
+category_name = "Commodity"
+commodity_name = "nat_u"
+
+raw_data = make_sort_list(metric_cat, table_name, 'Time', category_name, commodity_name)
+
+
+## raw_data is a list of tuples [resourceId, time]
+processed_data = make_raw_list(data, data_table, metric_cat, metric_cat, raw_data)
+
+## correct data except its in months
+
+out_data = time_sort(processed_data, sim_length)
+
+csv_name = "Uranium_Mined.csv"
+csv_w(out_data, csv_name)
+
+
+### 
+
+
 
