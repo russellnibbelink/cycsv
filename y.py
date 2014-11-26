@@ -22,7 +22,7 @@ def make_list(metric, table, order):
 def make_sort_list(metric, table, order,filter_category, filter_metric):
     #make_sort_list('TransactionId', 'Transactions', 'Time', 'SenderId', 24)
     mlist = []
-    for row in c.execute('SELECT '+ metric +','+ filter_category + ' FROM ' + table + ' ORDER BY ' + order):
+    for row in c.execute('SELECT '+ metric, Time +','+ filter_category + ' FROM ' + table + ' ORDER BY ' + order):
         if row[1] == filter_metric:
             mlist.append(row[0])
     return mlist
@@ -34,6 +34,19 @@ def test_list_1200():
         test.append(i)
         i += 1
     return test
+
+#timing functions
+
+#first function takes in metric, time
+
+def time_sort1(metric, time, lst):
+    lst[time // 12] += metric
+    return
+
+########
+
+def time_sort2(tup):
+    return
 
 def test_list_1200_one():
     test = []
@@ -85,9 +98,13 @@ def cumulative(list_by_month):
 test1 = test_list_1200_one()
 test2 = test_list_1200()
 csv_test = cumulative(test1)
-            
+
+#get this to work -->
+#to do: not all data is sampled exactly every month. Keep track of time stamp to determine the data points for each year. (determine when a year has passed).
+
 def csv_w(data, name):
-    with open(name, 'w', newline='') as csvfile:
+    #with open(name, 'w', newline='') as csvfile:
+    with open(name, 'w') as csvfile:
         writer = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         #writer.writerow(['Spam'] * 5 + ['Baked Beans'])
         for item in data:
